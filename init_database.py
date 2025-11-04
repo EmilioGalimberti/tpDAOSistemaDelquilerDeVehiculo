@@ -1,4 +1,4 @@
-from database import init_db
+from sistema.database import init_db
 
 print("Iniciando la creación de la base de datos...")
 init_db()

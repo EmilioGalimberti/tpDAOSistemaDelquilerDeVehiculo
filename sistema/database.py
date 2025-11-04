@@ -1,7 +1,9 @@
 import sqlite3
+import os
 
-# Define el nombre de tu archivo de base de datos
-DATABASE_NAME = 'alquileres.db'
+# Obtiene la ruta absoluta del directorio raíz del proyecto
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATABASE_NAME = os.path.join(BASE_DIR, 'alquileres.db')
 
 
 def get_db_connection():
@@ -29,8 +31,9 @@ def init_db():
         return
 
     try:
-        # Lee el archivo schema.sql
-        with open('schema.sql', 'r') as f:
+        # Define la ruta al schema.sql relativo al directorio base
+        schema_path = os.path.join(BASE_DIR, 'schema.sql')
+        with open(schema_path, 'r') as f:
             sql_script = f.read()
 
         # Ejecuta el script SQL para crear las tablas
