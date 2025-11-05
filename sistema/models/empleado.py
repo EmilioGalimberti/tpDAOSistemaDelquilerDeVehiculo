@@ -8,5 +8,8 @@ class Empleado(db.Model):
     apellido = db.Column(db.String(80), nullable=False)
     dni = db.Column(db.String(20), unique=True, nullable=False)
     rol = db.Column(db.String(80), nullable=False)
+    direccion = db.Column(db.String(120), nullable=True)
+    telefono = db.Column(db.String(20), nullable=True)
+    email = db.Column(db.String(120), nullable=True)
 
     alquileres = db.relationship('Alquiler', back_populates='empleado')
