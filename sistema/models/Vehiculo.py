@@ -32,6 +32,8 @@ class Vehiculo(db.Model):
     # lista de todos los objetos Alquiler de este auto.
     alquileres = db.relationship('Alquiler', back_populates='vehiculo')
 
+    mantenimientos = db.relationship('Mantenimiento', back_populates='vehiculo')
+
     def __repr__(self):
         # Un método útil para debugging
         return f'<Vehiculo {self.patente} (ID: {self.id})>'

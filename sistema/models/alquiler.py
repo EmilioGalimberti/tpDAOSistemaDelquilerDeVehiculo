@@ -21,3 +21,5 @@ class Alquiler(db.Model):
     cliente = db.relationship('Cliente', back_populates='alquileres')
     empleado = db.relationship('Empleado', back_populates='alquileres')
     vehiculo = db.relationship('Vehiculo', back_populates='alquileres')
+
+    multas = db.relationship('Multa', back_populates='alquiler')

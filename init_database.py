@@ -19,6 +19,8 @@ try:
     from sistema.models.cliente import Cliente
     from sistema.models.empleado import Empleado
     from sistema.models.alquiler import Alquiler
+    from sistema.models.mantenimiento import Mantenimiento
+    from sistema.models.multa import Multa
 except ImportError as e:
     print(f"Error: No se pudieron importar los módulos. Asegúrate de que __init__.py esté bien configurado.")
     print(f"Detalle: {e}")
