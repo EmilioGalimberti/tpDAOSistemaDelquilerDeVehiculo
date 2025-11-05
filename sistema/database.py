@@ -1,3 +1,5 @@
+#ESTE HACIA TODA LA CONEXION, AHORA CON flask_sqlalchemy NOS ABSTRAEMOS DE ESTO Y SOLO LO CONFIGURAMOS EN EL __init__ DE TODA LA APP
+
 import sqlite3
 import os
 
