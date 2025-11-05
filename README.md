@@ -64,36 +64,147 @@ Sigue estos pasos para levantar el entorno de desarrollo local:
 
 ## 📁 Estructura del Proyecto
 
-El proyecto está organizado siguiendo el patrón arquitectónico **MVC (Modelo-Vista-Controlador)** para mantener una clara separación de responsabilidades.
+El proyecto está organizado siguiendo el patrón arquitectónico **MVC (Modelo-Vista-Controlador)** y utiliza un patrón **Application Factory** para inicializar Flask.
 
 ```
-/sistema_alquileres_project/
+## 📁 Estructura del Proyecto
+
+
+/tpDAOSistemaDelquilerDeVehiculo/
 |
 |-- /sistema/                <-- Paquete principal de la aplicación Flask
-|   |-- __init__.py          # "Fábrica" de la app: Crea la app y registra los Controladores (Blueprints)
-|   |-- database.py          # Módulo para manejar la conexión a la BD (get_db_connection)
+|   |-- __init__.py          # Define la "Application Factory" (create_app)
+|   |                        # e inicializa el objeto 'db' de SQLAlchemy.
 |   |
 |   |-- /controllers/        <-- (C) CONTROLADORES (Lógica de Rutas)
-|   |   |-- __init__.py
+|   |   |-- __init__.py      # (Vacío)
 |   |   |-- main_controller.py   # Blueprint para rutas principales (/, /index)
-|   |   |-- (futuro) vehiculo_controller.py  # Blueprint para /vehiculos, /vehiculos/nuevo, etc.
 |   |
 |   |-- /models/             <-- (M) MODELOS (Lógica de Negocio y Datos)
-|   |   |-- __init__.py
-|   |   |-- (futuro) vehiculo.py # Contendrá la clase Vehiculo, EstadoVehiculo, etc.
+|   |   |-- __init__.py      # (Vacío)
+|   |   |-- marca.py         # Clase Marca
+|   |   |-- modelo.py        # Clase Modelo
+|   |   |-- vehiculo.py      # Clase Vehiculo (aquí irá el Patrón State)
+|   |   |-- cliente.py       # Clase Cliente
+|   |   |-- empleado.py      # Clase Empleado
+|   |   |-- alquiler.py      # Clase Alquiler (Transacción principal)
 |   |
 |   |-- /templates/          <-- (V) VISTAS (Plantillas HTML)
 |   |   |-- index.html
 |   |
 |   |-- /static/             <-- Archivos estáticos (CSS, JS, imágenes)
 |
-|-- run.py                   # Script de arranque (Inicia el servidor web)
-|-- init_database.py         # Script para crear la BD desde cero usando schema.sql
-|-- schema.sql               # Definición SQL de todas las tablas
-|-- alquileres.db            # El archivo de la base de datos SQLite (creado por init_database.py)
-|-- requirements.txt         # Lista de dependencias de Python
+|-- run.py                   # Script de arranque (Llama a create_app() e inicia el servidor)
+|-- init_database.py         # Script para crear y poblar la BD usando SQLAlchemy (db.create_all())
+|-- alquileres.db            # Archivo de la BD (creado por init_database.py)
+|-- requirements.txt         # Lista de dependencias de Python (Flask, Flask-SQLAlchemy)
+|-- .gitignore               # Ignora archivos (como venv/, __pycache__/, alquileres.db)
 |-- README.md                # Esta documentación
 ```
+
+
+---
+
+## 🏛️ Arquitectura y Decisiones de Diseño
+
+Esta sección explica las decisiones de arquitectura de software tomadas para el proyecto, por qué se eligieron y cómo funcionan.
+
+### 1. El Patrón "Application Factory"
+
+En lugar de crear la instancia de la aplicación Flask (`app`) de forma global en `sistema/__init__.py`, usamos una función `create_app()`.
+
+**El Problema que Resuelve: Importaciones Circulares**
+
+En una aplicación Flask, es común tener un "callejón sin salida" (una importación circular):
+1.  El archivo `__init__.py` necesita crear `app` y `db` (la base de datos).
+2.  Para crear la base de datos, `__init__.py` necesita importar los Modelos (ej. `Vehiculo`, `Cliente`).
+3.  Pero los archivos de Modelos (ej. `vehiculo.py`) necesitan importar el objeto `db` desde `__init__.py` para poder heredar de `db.Model`.
+
+Python no puede resolver este círculo (Archivo A importa Archivo B, y Archivo B importa Archivo A).
+
+**La Solución (La Fábrica):**
+1.  **`sistema/__init__.py`** solo crea un objeto `db = SQLAlchemy()` **vacío y desconectado**.
+2.  Los Modelos (`vehiculo.py`, `cliente.py`, etc.) importan este `db` vacío sin problemas.
+3.  **`run.py`** (el script de inicio) llama a la función `create_app()`.
+4.  **Dentro de `create_app()`**, se crea la `app` y *luego* se conecta al objeto `db` usando `db.init_app(app)`. Finalmente, se registran los controladores (Blueprints).
+
+Esto rompe el ciclo y nos da una forma limpia y robusta de inicializar la aplicación.
+
+### 2. El Rol de los Modelos (Patrón "Active Record")
+
+Como notaste, nuestras clases en `/models/` tienen una doble responsabilidad. Este enfoque se conoce como el patrón **Active Record**.
+
+* **1. Rol de Mapeo (Similar a un Repositorio):** Heredan de `db.Model`, lo que le da a SQLAlchemy la información para "mapear" la clase a una tabla de la base de datos.
+* **2. Rol de Objeto de Negocio:** También contienen la lógica de negocio (métodos). Aquí es donde implementaremos el **Patrón State** (`alquilar()`, `devolver()`), el **Patrón Strategy** (para calcular costos), etc.
+
+**¿Por qué este enfoque?**
+Para este proyecto, mantiene la lógica de negocio y la persistencia de datos juntas, haciendo el código más simple y directo, lo cual es ideal para enfocarnos en los patrones de POO.
+
+**Escalabilidad a Futuro:**
+Tienes razón, en sistemas más grandes, estas responsabilidades se suelen separar usando el **"Patrón Repository"**. En ese diseño, tendríamos una clase `Vehiculo` (POO pura, sin `db.Model`) y una clase `VehiculoRepository` separada, cuyo único trabajo sería guardar y leer objetos `Vehiculo` de la base de datos.
+
+### 3. SQLAlchemy: El "Antes y Después" del ORM
+
+El cambio a SQLAlchemy (un Mapeador Objeto-Relacional u ORM) nos libera de escribir SQL a mano y nos permite pensar solo en objetos.
+
+#### Antes: CRUD Manual (sin ORM)
+
+Antes del refactor, teníamos que manejar la conexión y escribir SQL manualmente en cada modelo.
+
+```python
+# --- ANTES ---
+from sistema.database import get_db_connection
+
+class Vehiculo:
+    def __init__(self, patente, ...):
+        # ...
+    
+    def _crear(self):
+        with get_db_connection() as conn:
+            conn.execute(
+                "INSERT INTO vehiculos (patente, ...) VALUES (?, ...)",
+                (self.patente, ...)
+            )
+            conn.commit()
+
+    @staticmethod
+    def obtener_por_id(id):
+        with get_db_connection() as conn:
+            fila = conn.execute("SELECT * FROM vehiculos WHERE id = ?", (id,)).fetchone()
+            if fila:
+                return Vehiculo(fila['patente'], ...)
+# --- DESPUÉS ---
+from sistema import db # Importamos el objeto ORM
+
+class Vehiculo(db.Model):
+    # El ORM sabe que esto es una tabla
+    __tablename__ = 'vehiculos'
+    
+    # El ORM sabe que esto es una columna
+    id = db.Column(db.Integer, primary_key=True)
+    patente = db.Column(db.String(10), unique=True)
+    
+    # Aquí irá la lógica (Patrón State)
+    def alquilar(self):
+        # ...
+    
+# --- Cómo usamos el CRUD ahora (en los controladores) ---
+
+# Crear:
+auto_nuevo = Vehiculo(patente='AA123BB', ...)
+db.session.add(auto_nuevo)
+db.session.commit()
+
+# Leer:
+auto = Vehiculo.query.get(1)
+todos_los_autos = Vehiculo.query.all()
+
+# Actualizar:
+auto = Vehiculo.query.get(1)
+auto.estado = 'Alquilado'
+db.session.commit()
+```
+
 
 ---
 

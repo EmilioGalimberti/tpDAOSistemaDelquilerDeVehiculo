@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Marcas</title>
+</head>
+<body>
+    <h1>Marcas de Vehículos</h1>
+
+    <p>Estos datos vienen de la base de datos SQLite (vía SQLAlchemy):</p>
+
+    <ul>
+        {% for marca in marcas %}
+            <li>
+                ID: {{ marca.id }} - Nombre: <b>{{ marca.nombre }}</b>
+            </li>
+        {% else %}
+            <li>No hay marcas registradas en la base de datos.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="/">Volver al inicio</a>
+</body>
+</html>

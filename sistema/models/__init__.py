@@ -1,20 +1,21 @@
-# /sistema/controllers/main_controller.py
-from flask import Blueprint, render_template
+# /sistema/models/__init__.py
 
-# 1. Creamos el Blueprint
-# 'main' es el nombre del blueprint.
-# __name__ ayuda a Flask a encontrar la ubicación del blueprint.
-main_bp = Blueprint('main', __name__)
+# Este archivo convierte la carpeta 'models' en un paquete
+# e importa todos los archivos de modelo.
 
-# 2. Definimos la ruta dentro del Blueprint
-# Nota: Ahora usamos @main_bp.route() en lugar de @app.route()
-@main_bp.route('/')
-@main_bp.route('/index')
-def index():
-    """
-    Ruta principal. Renderiza la plantilla 'index.html'.
-    """
-    return render_template('index.html', titulo='Página Principal')
+# Esto asegura que SQLAlchemy "descubra"
+# todas nuestras clases de modelo (Modelo, Vehiculo, etc.)
+# cuando se cargue el paquete.
 
-# Aquí podrías agregar otras rutas "principales"
-# como @main_bp.route('/about'), etc.
+from . import marca
+from . import modelo
+from . import vehiculo
+from . import cliente
+from . import empleado
+from . import alquiler
+from . import mantenimiento
+from . import multa
+
+# (Cuando Jules termine, también añadirás:)
+# from . import mantenimiento
+# from . import multa
