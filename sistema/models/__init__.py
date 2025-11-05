@@ -13,6 +13,8 @@ from . import vehiculo
 from . import cliente
 from . import empleado
 from . import alquiler
+from . import mantenimiento
+from . import multa
 
 # (Cuando Jules termine, también añadirás:)
 # from . import mantenimiento

@@ -29,11 +29,14 @@ except ImportError as e:
 print("Iniciando la creación de la base de datos...")
 
 # 1. Crea la app usando la factory
+# Esto es necesario para que SQLAlchemy tenga acceso a la configuración de la base de datos (dónde está el archivo alquileres.db).
 app = create_app()
 
 # 2. Trabaja dentro del "contexto" de la aplicación
 #    Esto es necesario para que SQLAlchemy sepa a qué app
 #    y a qué base de datos está conectado.
+#crear un "contexto de aplicación". Esto permite que el código que está adentro se ejecute como si estuviera
+# dentro de la aplicación Flask en funcionamiento, dándole acceso a la configuración y a las extensiones como SQLAlchem
 with app.app_context():
     print("Eliminando tablas antiguas (si existen)...")
     # 3. Elimina todas las tablas existentes (para un reinicio limpio)
@@ -41,6 +44,10 @@ with app.app_context():
     print("Tablas antiguas eliminadas.")
 
     # 4. Crea todas las tablas nuevas basadas en tus clases Modelo
+    #La línea más importante es db.create_all(). Este comando le dice a SQLAlchemy que revise
+    # todos los modelos que ha descubierto (a través de las importaciones) y
+    # cree en la base de datos todas las tablas que aún no existan.
+    # Si una tabla ya existe, no la modifica ni la borra.
     db.create_all()
     print("Tablas nuevas creadas exitosamente.")
 

@@ -12,14 +12,12 @@ class Alquiler(db.Model):
     costo_total = db.Column(db.Float)
     estado = db.Column(db.String(20), nullable=False, default='Activo')
 
-    # --- ¡CORRECCIÓN! Descomentamos las claves foráneas ---
+
     id_cliente = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
     id_empleado = db.Column(db.Integer, db.ForeignKey('empleados.id'), nullable=False)
     id_vehiculo = db.Column(db.Integer, db.ForeignKey('vehiculos.id'), nullable=False)
 
-    # --- ¡CORRECCIÓN! Descomentamos las relaciones ---
     cliente = db.relationship('Cliente', back_populates='alquileres')
     empleado = db.relationship('Empleado', back_populates='alquileres')
     vehiculo = db.relationship('Vehiculo', back_populates='alquileres')
-
     multas = db.relationship('Multa', back_populates='alquiler')

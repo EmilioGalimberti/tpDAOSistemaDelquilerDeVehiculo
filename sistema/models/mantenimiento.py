@@ -7,5 +7,7 @@ class Mantenimiento(db.Model):
     descripcion = db.Column(db.String(200), nullable=False)
     costo = db.Column(db.Float, nullable=False)
     tipo = db.Column(db.String(50), nullable=False)
-    id_vehiculo = db.Column(db.Integer, db.ForeignKey('vehiculo.id'), nullable=False)
+    id_vehiculo = db.Column(db.Integer, db.ForeignKey('vehiculos.id'), nullable=False)
+
+
     vehiculo = db.relationship('Vehiculo', back_populates='mantenimientos')

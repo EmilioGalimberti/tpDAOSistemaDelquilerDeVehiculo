@@ -31,7 +31,6 @@ class Vehiculo(db.Model):
     # 'alquileres': Nos permite hacer 'mi_auto.alquileres' y obtener una
     # lista de todos los objetos Alquiler de este auto.
     alquileres = db.relationship('Alquiler', back_populates='vehiculo')
-
     mantenimientos = db.relationship('Mantenimiento', back_populates='vehiculo')
 
     def __repr__(self):
