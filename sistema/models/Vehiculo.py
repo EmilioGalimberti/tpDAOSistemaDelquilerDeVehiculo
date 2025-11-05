@@ -1,103 +1,62 @@
 # /sistema/models/vehiculo.py
+from sistema import db
 
-from sistema.database import get_db_connection
 
-class Vehiculo:
+# NOTA: quitamos 'get_db_connection' y todo el SQL manual
+
+class Vehiculo(db.Model):
     """
-    Representa un vehículo en el sistema.
-    Esta clase manejará la lógica de negocio y la interacción
-    con la tabla 'vehiculos' de la base de datos.
+    Refactor de la clase Vehiculo para usar SQLAlchemy.
+    La herencia de 'db.Model' nos da todo el poder del ORM.
+    Ya no necesitamos métodos CRUD manuales.
     """
+    __tablename__ = 'vehiculos'
 
-    def __init__(self, id_modelo, anio, tipo, patente, estado, costo_diario, id=None):
-        """
-        Constructor para un objeto Vehiculo.
-        """
-        self.id = id
-        self.id_modelo = id_modelo
-        self.anio = anio
-        self.tipo = tipo
-        self.patente = patente
-        self.estado = estado  # Esto será clave para el Patrón State
-        self.costo_diario = costo_diario
+    # --- Columnas (Mapeo de la tabla) ---
+    id = db.Column(db.Integer, primary_key=True)
+    anio = db.Column(db.Integer, nullable=False)
+    tipo = db.Column(db.String(50), nullable=False)
+    patente = db.Column(db.String(10), unique=True, nullable=False)
+    estado = db.Column(db.String(50), default='Disponible', nullable=False)
+    costo_diario = db.Column(db.Float, nullable=False)
 
-    def guardar(self):
-        """
-        Guarda el vehículo actual (nuevo o existente) en la base de datos.
-        """
-        if self.id is None:
-            # Es un vehículo nuevo (Crear)
-            self._crear()
-        else:
-            # Es un vehículo existente (Actualizar)
-            self._actualizar()
+    # Clave Foránea: Conecta con 'modelos.id'
+    id_modelo = db.Column(db.Integer, db.ForeignKey('modelos.id'), nullable=False)
 
-    def _crear(self):
-        """Crea un nuevo vehículo en la base de datos."""
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT INTO vehiculos (id_modelo, anio, tipo, patente, estado, costo_diario)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (self.id_modelo, self.anio, self.tipo, self.patente, self.estado, self.costo_diario)
-            )
-            self.id = cursor.lastrowid # Obtenemos el ID auto-generado
-            conn.commit()
+    # --- Relaciones (Atributos virtuales de Python) ---
 
-    def _actualizar(self):
-        """Actualiza un vehículo existente en la base dedatos."""
-        with get_db_connection() as conn:
-            conn.execute(
-                """
-                UPDATE vehiculos
-                SET id_modelo = ?, anio = ?, tipo = ?, patente = ?, estado = ?, costo_diario = ?
-                WHERE id = ?
-                """,
-                (self.id_modelo, self.anio, self.tipo, self.patente, self.estado, self.costo_diario, self.id)
-            )
-            conn.commit()
+    # 'modelo': Nos permite hacer 'mi_auto.modelo' y obtener el objeto Modelo
+    modelo = db.relationship('Modelo', back_populates='vehiculos')
 
-    @staticmethod
-    def eliminar(id):
-        """Elimina un vehículo de la base de datos por su ID."""
-        with get_db_connection() as conn:
-            conn.execute("DELETE FROM vehiculos WHERE id = ?", (id,))
-            conn.commit()
+    # 'alquileres': Nos permite hacer 'mi_auto.alquileres' y obtener una
+    # lista de todos los objetos Alquiler de este auto.
+    alquileres = db.relationship('Alquiler', back_populates='vehiculo')
 
-    @staticmethod
-    def obtener_por_id(id):
-        """Obtiene un vehículo por su ID y devuelve un objeto Vehiculo."""
-        with get_db_connection() as conn:
-            fila = conn.execute("SELECT * FROM vehiculos WHERE id = ?", (id,)).fetchone()
-            if fila:
-                # Convertimos la fila (sqlite3.Row) en un objeto Vehiculo
-                return Vehiculo(
-                    id=fila['id'],
-                    id_modelo=fila['id_modelo'],
-                    anio=fila['anio'],
-                    tipo=fila['tipo'],
-                    patente=fila['patente'],
-                    estado=fila['estado'],
-                    costo_diario=fila['costo_diario']
-                )
-            return None # No se encontró
+    def __repr__(self):
+        # Un método útil para debugging
+        return f'<Vehiculo {self.patente} (ID: {self.id})>'
 
-    @staticmethod
-    def obtener_todos():
-        """Obtiene todos los vehículos y devuelve una lista de objetos Vehiculo."""
-        with get_db_connection() as conn:
-            filas = conn.execute("SELECT * FROM vehiculos").fetchall()
-            # Convertimos cada fila en un objeto Vehiculo
-            return [
-                Vehiculo(
-                    id=fila['id'],
-                    id_modelo=fila['id_modelo'],
-                    anio=fila['anio'],
-                    tipo=fila['tipo'],
-                    patente=fila['patente'],
-                    estado=fila['estado'],
-                    costo_diario=fila['costo_diario']
-                ) for fila in filas
-            ]
+    #
+    # --- ¡FIN! ---
+    #
+    # ¿Dónde están guardar(), eliminar(), obtener_por_id()?
+    # ¡YA NO LOS NECESITAMOS!
+    #
+    # SQLAlchemy nos los da:
+    #
+    # Crear:
+    #   auto = Vehiculo(patente='AA123BB', ...)
+    #   db.session.add(auto)
+    #   db.session.commit()
+    #
+    # Buscar:
+    #   auto = Vehiculo.query.get(1)
+    #
+    # Actualizar:
+    #   auto.estado = 'Alquilado'
+    #   db.session.commit()
+    #
+    # Eliminar:
+    #   db.session.delete(auto)
+    #   db.session.commit()
+    #
