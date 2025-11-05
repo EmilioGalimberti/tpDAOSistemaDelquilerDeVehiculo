@@ -34,8 +34,14 @@ def create_app():
         from .controllers.main_controller import main_bp
         app.register_blueprint(main_bp)
 
+
+
         # Aquí registraremos los futuros blueprints
         # from .controllers.vehiculo_controller import vehiculo_bp
         # app.register_blueprint(vehiculo_bp, url_prefix='/vehiculos')
+
+        from .controllers.marca_controller import marca_bp
+        # Todas las rutas de este blueprint empezarán con /marcas
+        app.register_blueprint(marca_bp, url_prefix='/marcas')
 
     return app

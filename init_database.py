@@ -17,8 +17,8 @@ try:
     from sistema.models.modelo import Modelo
     from sistema.models.vehiculo import Vehiculo
     from sistema.models.cliente import Cliente
-    #from sistema.models.
-    #from sistema.models.alquiler import Alquiler
+    from sistema.models.empleado import Empleado
+    from sistema.models.alquiler import Alquiler
 except ImportError as e:
     print(f"Error: No se pudieron importar los módulos. Asegúrate de que __init__.py esté bien configurado.")
     print(f"Detalle: {e}")
@@ -112,3 +112,10 @@ with app.app_context():
         print(f"Error al poblar la base de datos: {e}")
 
 print("Proceso de inicialización completado.")
+
+#El ORM hace esto por nosotros. Lee nuestras clases de Python (como class Marca(db.Model) o
+# class Vehiculo(db.Model)) y genera el SQL CREATE TABLE automáticamente.
+
+
+#La función db.create_all() en nuestro nuevo init_database.py es la que le dice a SQLAlchemy: "
+# Mira todas las clases que heredan de db.Model y crea las tablas por mí".
