@@ -9,7 +9,7 @@ class Client(db.Model):
     id_number = db.Column(db.String(20), unique=True, nullable=False)
     address = db.Column(db.String(120))
     telephone_number = db.Column(db.String(20))
-    email = db.Column(db.String(120), unique=True, nullable=True)
+    email = db.Column(db.String(120), nullable=True)
 
     # The relationship to 'Rental' is commented out until the Rental model is created.
     # rentals = db.relationship('Rental', back_populates='client')
