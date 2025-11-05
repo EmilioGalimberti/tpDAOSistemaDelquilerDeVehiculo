@@ -1,21 +1,41 @@
 # /sistema/__init__.py
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+import os
 
-# Crea la instancia de la aplicación Flask
-app = Flask(__name__)
+# 1. Crea la instancia de SQLAlchemy SIN ligarla a una app
+#    Esto nos permite importarla en otros archivos (como los modelos)
+#    de forma segura.
+db = SQLAlchemy()
 
-# --- Registro de Blueprints (Controladores) ---
 
-# 1. Importa tu blueprint (controlador)
-from .controllers.main_controller import main_bp
+def create_app():
+    """
+    Función "Factory" para crear la instancia de la aplicación Flask.
+    """
+    app = Flask(__name__)
 
-# 2. Registry el blueprint en la aplicación
-app.register_blueprint(main_bp)
+    # --- Configuración de la Base de Datos ---
+    # Obtenemos la ruta absoluta de la raíz del proyecto
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Definimos la URI de la base de datos SQLite
+    DB_PATH = os.path.join(BASE_DIR, 'alquileres.db')
 
-# Cuando crees el controlador de vehículos, harás lo mismo:
-# from .controllers.vehiculo_controller import vehiculo_bp
-# app.register_blueprint(vehiculo_bp, url_prefix='/vehiculos')
-# (El url_prefix es genial para que todas las rutas de ese
-#  controlador empiecen con /vehiculos)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Desactiva notificaciones innecesarias
 
-# --- Fin del Registro ---
+    # 2. Inicializa la instancia 'db' CON la aplicación 'app'
+    db.init_app(app)
+
+    # --- Registro de Blueprints (Controladores) ---
+    # Usamos 'with app.app_context()' para que los blueprints
+    # tengan acceso a la aplicación configurada.
+    with app.app_context():
+        from .controllers.main_controller import main_bp
+        app.register_blueprint(main_bp)
+
+        # Aquí registraremos los futuros blueprints
+        # from .controllers.vehiculo_controller import vehiculo_bp
+        # app.register_blueprint(vehiculo_bp, url_prefix='/vehiculos')
+
+    return app

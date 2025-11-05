@@ -1,8 +1,9 @@
 # /run.py
-from sistema import app
+from sistema import create_app
+
+# Llama a la factory para crear la aplicación
+app = create_app()
 
 if __name__ == '__main__':
-    # debug=True activa el modo de depuración.
-    # El servidor se reiniciará automáticamente con cada cambio
-    # y mostrará errores detallados en el navegador.
+    # debug=True es genial para desarrollo
     app.run(debug=True)
