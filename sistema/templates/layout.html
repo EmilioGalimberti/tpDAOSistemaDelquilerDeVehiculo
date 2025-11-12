@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <title>{% block title %}Dashboard{% endblock %} - Admin Alquileres</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+</head>
+<body>
+
+        <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>RentalAdmin</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                               
+    <li><a href="{{ url_for('main.index') }}">Dashboard</a></li>
+               
+    <li><a href="{{ url_for('vehiculos.listar_vehiculos') }}">Vehículos</a></li>
+               
+    <li><a href="{{ url_for('alquiler.listar_alquileres') }}">Alquileres</a></li>               
+    <li><a href="{{ url_for('alquiler.registrar_alquiler') }}">Nuevo Alquiler</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+        <div class="main-content">
+        <header class="main-header">
+                        <h1 id="main-title">{% block page_title %}Dashboard{% endblock %}</h1>
+        </header>
+
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+</body>
+</html>

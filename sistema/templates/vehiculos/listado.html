@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}Lista de Vehículos{% endblock %}
+{% block page_title %}Flota de Vehículos{% endblock %}
+
+{% block content %}
+    <section id="vehicles" class="page active"> <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Vehículo</th>
+                        <th>Patente</th>
+                        <th>Año</th>
+                        <th>Costo Diario</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vehiculos %}
+                    <tr>
+                        <td>{{ v.id }}</td>
+                        <td>{{ v.modelo.marca.nombre }} {{ v.modelo.descripcion }}</td>
+                        <td>{{ v.patente }}</td>
+                        <td>{{ v.anio }}</td>
+                        <td>${{ "%.2f"|format(v.costo_diario) }}</td>
+                        <td>
+                            {% if v.estado == 'Disponible' %}
+                                <span class="status status-disponible">Disponible</span>
+                            {% elif v.estado == 'Alquilado' %}
+                                <span class="status status-alquilado">Alquilado</span>
+                            {% elif v.estado == 'EnMantenimiento' %}
+                                <span class="status status-mantenimiento">Mantenimiento</span>
+                            {% else %}
+                                <span class="status">{{ v.estado }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">No hay vehículos registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

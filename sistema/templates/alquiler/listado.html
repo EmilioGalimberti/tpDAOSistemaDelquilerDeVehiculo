@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}Lista de Alquileres{% endblock %}
+{% block page_title %}Alquileres Registrados{% endblock %}
+
+{% block content %}
+<section id="rentals" class="page active">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Alquiler</th>
+                    <th>Cliente</th>
+                    <th>Vehículo</th>
+                    <th>Fecha Inicio</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alq in alquileres %}
+                <tr>
+                    <td>{{ alq.id }}</td>
+                    <td>{{ alq.cliente.apellido }}, {{ alq.cliente.nombre }}</td>
+                    <td>
+                        {{ alq.vehiculo.modelo.marca.nombre }} {{ alq.vehiculo.modelo.descripcion }}
+                        ({{ alq.vehiculo.patente }})
+                    </td>
+                    <td>{{ alq.fecha_inicio.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        {% if alq.estado == 'Activo' %}
+                            <span class="status status-activo">Activo</span>
+                        {% else %}
+                            <span class="status status-finalizado">Finalizado</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No hay alquileres registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
