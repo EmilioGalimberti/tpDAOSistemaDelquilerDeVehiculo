@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}Nuevo Alquiler{% endblock %}
+{% block page_title %}Registrar Nuevo Alquiler{% endblock %}
+
+{% block content %}
+    <section id="new-rental" class="page active">
+        <div class="form-container">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flashes">
+                {% for category, message in messages %}
+                  <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('alquiler.registrar_alquiler') }}" method="POST">
+                
+                <div class="form-group">
+                    <label for="id_cliente">Seleccionar Cliente</label>
+                    <select id="id_cliente" name="id_cliente" required>
+                        <option value="">Seleccione un cliente...</option>
+                        {% for c in clientes %}
+                        <option value="{{ c.id }}">{{ c.apellido }}, {{ c.nombre }} (DNI: {{ c.dni }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_vehiculo">Seleccionar Vehículo Disponible</label>
+                    <select id="id_vehiculo" name="id_vehiculo" required>
+                        <option value="">Seleccione un vehículo...</option>
+                        {% for v in vehiculos %}
+                        <option value="{{ v.id }}">{{ v.modelo.marca.nombre }} {{ v.modelo.descripcion }} (Patente: {{ v.patente }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-button">Registrar Alquiler</button>
+            </form>
+        </div>
+    </section>
+{% endblock %}
